@@ -50,3 +50,5 @@ end
 gem "rspec-rails", "~> 7.1"
 gem "faker", "~> 3.8"
 gem "kaminari", "~> 1.2"
+
+gem "factory_bot_rails", "~> 6.5"
