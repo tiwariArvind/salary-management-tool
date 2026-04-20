@@ -19,6 +19,15 @@ RSpec.describe "Employees API", type: :request do
       expect(json["data"].length).to eq(2)
     end
 
+    it "filters by country" do
+      create(:employee, country: "USA")
+
+      get "/employees", params: { country: "India" }
+
+      json = JSON.parse(response.body)
+      expect(json["data"].all? { |e| e["country"] == "India" }).to be true
+    end
+
   end
 
   describe "POST /employees" do
