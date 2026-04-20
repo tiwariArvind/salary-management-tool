@@ -1,9 +1,13 @@
 # app/controllers/employees_controller.rb
 class EmployeesController < ApplicationController
   def index
-    employees = Employee.page(params[:page]).per(50)
-    render json: employees
-  end
+  employees = Employee
+                .order(updated_at: :desc)
+                .page(params[:page])
+                .per(50)
+
+  render json: employees
+end
 
   def show
     render json: Employee.find(params[:id])
