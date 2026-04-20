@@ -48,6 +48,12 @@ RSpec.describe "Employees API", type: :request do
 
       expect(response).to have_http_status(:created)
     end
+
+    it "returns error for invalid data" do
+      post "/employees", params: { employee: { first_name: "" } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "DELETE /employees/:id" do
