@@ -56,6 +56,19 @@ RSpec.describe "Employees API", type: :request do
     end
   end
 
+  describe "PUT /employees/:id" do
+    let!(:employee) { create(:employee) }
+
+    it "updates employee" do
+      put "/employees/#{employee.id}", params: {
+        employee: { salary: 90000 }
+      }
+
+      expect(response).to have_http_status(:ok)
+      expect(employee.reload.salary).to eq(90000)
+    end
+  end
+
   describe "DELETE /employees/:id" do
     let!(:employee) { create(:employee) }
 
