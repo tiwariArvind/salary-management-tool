@@ -1,30 +1,57 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
-#   Character.create(name: "Luke", movie: movies.first)
 # db/seeds.rb
-require 'faker'
+
+puts "🧹 Cleaning existing employees..."
+Employee.delete_all
+
+puts "📦 Loading name datasets..."
+
+first_names = File.readlines(
+  Rails.root.join('lib/data/first_names.txt'),
+  chomp: true
+).reject(&:blank?)
+
+last_names = File.readlines(
+  Rails.root.join('lib/data/last_names.txt'),
+  chomp: true
+).reject(&:blank?)
+
+raise "❌ Name files missing!" if first_names.empty? || last_names.empty?
+
+TOTAL_RECORDS = 10_000
+BATCH_SIZE = 1000
+
+puts "🚀 Seeding #{TOTAL_RECORDS} employees..."
 
 records = []
 
-10_000.times do
-  first = Faker::Name.first_name
-  last = Faker::Name.last_name
+TOTAL_RECORDS.times do |i|
+  first = first_names[i % first_names.length]
+  last  = last_names.sample
 
   records << {
     first_name: first,
     last_name: last,
-    full_name: "#{first} #{last}",
+
     job_title: ["Engineer", "Manager", "HR", "Sales"].sample,
     country: ["India", "USA", "UK"].sample,
-    salary: rand(30000..150000),
+    salary: rand(30_000..150_000),
     department: ["Tech", "HR", "Sales"].sample,
-    created_at: Time.now,
-    updated_at: Time.now
+
+    email: "employee#{i}@example.com",
+    currency: ["INR", "USD", "GBP"].sample,
+    hired_on: Date.today - rand(0..1825),
+    employment_status: ["active", "inactive", "terminated"].sample,
+    employee_number: "EMP#{1000 + i}",
+
+    created_at: Time.current,
+    updated_at: Time.current
   }
 end
 
-Employee.insert_all(records)
+puts "💾 Inserting records..."
+
+records.each_slice(BATCH_SIZE) do |batch|
+  Employee.insert_all(batch)
+end
+
+puts "🎉 Done! Total Employees: #{Employee.count}"
