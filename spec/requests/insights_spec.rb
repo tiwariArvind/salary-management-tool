@@ -8,27 +8,27 @@ RSpec.describe "Salary Insights API", type: :request do
     create(:employee, country: "India", job_title: "Manager", salary: 90000)
   end
 
-  describe "GET /insights/country" do
+  describe "GET /insights/salary_by_country" do
     it "returns min, max, avg salary" do
-      get "/insights/country", params: { country: "India" }
+      get "/insights/salary_by_country", params: { country: "India" }
       json = JSON.parse(response.body)
 
-      expect(json["min"]).to eq(50000)
-      expect(json["max"]).to eq(90000)
-      expect(json["avg"]).to eq(70000)
+      expect(json["min_salary"]).to eq(50000)
+      expect(json["max_salary"]).to eq(90000)
+      expect(json["avg_salary"]).to eq(70000)
     end
   end
 
-  describe "GET /insights/job_title" do
+  describe "GET /insights/job_title_avg" do
     it "returns avg salary by job title" do
-      get "/insights/job_title", params: {
+      get "/insights/job_title_avg", params: {
         country: "India",
         job_title: "Engineer"
       }
 
       json = JSON.parse(response.body)
 
-      expect(json["avg"]).to eq(60000)
+      expect(json["avg_salary"]).to eq(60000)
     end
   end
 end
