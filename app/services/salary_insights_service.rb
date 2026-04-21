@@ -51,13 +51,59 @@ class SalaryInsightsService
   def self.dashboard(country)
     employees = Employee.where(country: country)
 
+    salaries = employees.pluck(:salary).compact.sort
+    count = salaries.size
+
+    return empty_response if count == 0
+
     {
-      country: country,
-      total_employees: employees.count,
-      avg_salary: employees.average(:salary)&.to_f || 0.0,
-      max_salary: employees.maximum(:salary)&.to_f || 0.0,
-      min_salary: employees.minimum(:salary)&.to_f || 0.0,
-      top_5: employees.order(salary: :desc).limit(5)
+      total_employees: count,
+      min: salaries.first,
+      max: salaries.last,
+      avg: (salaries.sum / count.to_f).round(2),
+      median: median(salaries),
+      segments: salary_segments(salaries),
+      currency_breakdown: currency_breakdown(employees)
+    }
+  end
+
+  private
+
+  # 📊 Median
+  def self.median(arr)
+    len = arr.length
+    mid = len / 2
+
+    if len.odd?
+      arr[mid]
+    else
+      ((arr[mid - 1] + arr[mid]) / 2.0).round(2)
+    end
+  end
+
+  # 📊 Salary buckets
+  def self.salary_segments(salaries)
+    {
+      low: salaries.count { |s| s < 50000 },
+      mid: salaries.count { |s| s.between?(50000, 100000) },
+      high: salaries.count { |s| s > 100000 }
+    }
+  end
+
+  # 💱 Currency breakdown
+  def self.currency_breakdown(employees)
+    employees.group(:currency).count
+  end
+
+  def self.empty_response
+    {
+      total_employees: 0,
+      min: 0,
+      max: 0,
+      avg: 0,
+      median: 0,
+      segments: { low: 0, mid: 0, high: 0 },
+      currency_breakdown: {}
     }
   end
 end
